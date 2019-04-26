@@ -5,11 +5,11 @@ using UnityEngine;
 public class TileCollider : MonoBehaviour
 {
     [SerializeField]
-    private Tile parent;
+    private Tile parent = null;
     public Tile Parent { get { return parent; } }
     [SerializeField]
-    private Collider2D collider;
-    public Collider2D Collider { get { return collider; } }
+    private Collider2D tileCollider = null;
+    public Collider2D Collider { get { return tileCollider; } }
 
     // Start is called before the first frame update
     void Start()

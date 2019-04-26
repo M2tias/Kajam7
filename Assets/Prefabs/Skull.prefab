@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 2347192533262123098}
   - component: {fileID: 8458491575326391815}
   - component: {fileID: 8156252270080544825}
+  - component: {fileID: 100602745}
   m_Layer: 0
   m_Name: Skull
   m_TagString: Enemy
@@ -48,6 +49,11 @@ MonoBehaviour:
   colliderForTakingDamage: {fileID: 4167750357691618661}
   colliderForDamagingPlayer: {fileID: 8156252270080544825}
   HP: 1
+  damage: 1
+  walks: 0
+  dir: 1
+  speed: 3
+  spriteRenderer: {fileID: 2347192533527284131}
 --- !u!61 &8156252270080544825
 BoxCollider2D:
   m_ObjectHideFlags: 0
@@ -74,6 +80,27 @@ BoxCollider2D:
   serializedVersion: 2
   m_Size: {x: 0.7, y: 0.65}
   m_EdgeRadius: 0
+--- !u!50 &100602745
+Rigidbody2D:
+  serializedVersion: 4
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2347192533262123099}
+  m_BodyType: 0
+  m_Simulated: 1
+  m_UseFullKinematicContacts: 0
+  m_UseAutoMass: 0
+  m_Mass: 1
+  m_LinearDrag: 0
+  m_AngularDrag: 0.05
+  m_GravityScale: 0
+  m_Material: {fileID: 0}
+  m_Interpolate: 0
+  m_SleepingMode: 1
+  m_CollisionDetection: 0
+  m_Constraints: 7
 --- !u!1 &2347192533527284061
 GameObject:
   m_ObjectHideFlags: 0
@@ -146,7 +173,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 4
-  m_Sprite: {fileID: 5182299067807867188, guid: 569bc16a1989def4dbf89b78e867ef5d,
+  m_Sprite: {fileID: -1722539767903399326, guid: 569bc16a1989def4dbf89b78e867ef5d,
     type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0

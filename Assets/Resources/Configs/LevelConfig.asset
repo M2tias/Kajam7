@@ -14,4 +14,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   levels:
   - {fileID: 4900000, guid: c719b74e33efa8b4289fd9d293c6e7a4, type: 3}
+  - {fileID: 4900000, guid: 2f6f4e6891b228f44b57bda01e262e4c, type: 3}
   tileset: {fileID: 4900000, guid: 1e9bb1a10972599419a9de453b02169e, type: 3}

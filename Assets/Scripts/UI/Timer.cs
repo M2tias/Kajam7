@@ -6,15 +6,15 @@ using UnityEngine.UI;
 public class Timer : MonoBehaviour
 {
     [SerializeField]
-    private Image tensOfMinutes;
+    private Image tensOfMinutes = null;
     [SerializeField]
-    private Image minutes;
+    private Image minutes = null;
     [SerializeField]
-    private Image tensOfSeconds;
+    private Image tensOfSeconds = null;
     [SerializeField]
-    private Image seconds;
+    private Image seconds = null;
     [SerializeField]
-    List<Sprite> digits;
+    List<Sprite> digits = null;
 
     // Start is called before the first frame update
     void Start()
@@ -29,7 +29,6 @@ public class Timer : MonoBehaviour
         int tensOfSecondsVal = (int)((Time.time % 60) / 10);
         int minutesVal = ((int)(Time.time / 60) % 10);
         int tensOfMinutesVal = (int)((int)(Time.time / 60) / 10);
-        Debug.Log(tensOfMinutesVal + " " + minutesVal + " : " + tensOfSecondsVal + " " + secondsVal);
 
         tensOfMinutes.sprite = digits[tensOfMinutesVal];
         minutes.sprite = digits[minutesVal];

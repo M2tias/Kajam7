@@ -7,6 +7,8 @@ public class Player : MonoBehaviour
 {
     [SerializeField]
     private Camera mainCamera = null;
+    [SerializeField]
+    private SpriteRenderer spriteRenderer = null;
     private Vector2 acc = Vector2.zero;
     private Vector2 vel = Vector2.zero;
     private float g = -0.45f;
@@ -17,32 +19,84 @@ public class Player : MonoBehaviour
     private Animator animator = null;
     private bool shooting = false;
     [SerializeField]
-    private Bone bone;
+    private Bone bone = null;
+    [SerializeField]
+    private LevelRuntime levelRuntime = null;
+    [SerializeField]
+    private PlayerRuntime playerRuntime = null;
+    [SerializeField]
+    private bool invulnerable = true;
+    private float invul_started = 0f;
+    private float invul_time = 2f;
+    private float lastFlash = 0f;
+    private float flashTime = 0.1f;
+    private bool flash = false;
+    private Shader shaderFlash;
+    private Shader shaderSpritesDefault;
+    private int shootDir = 1;
 
     // Start is called before the first frame update
     void Start()
     {
-
+        playerRuntime.Mana = 3;
+        playerRuntime.HP = 3;
+        shaderFlash = Shader.Find("GUI/Text Shader");
+        shaderSpritesDefault = Shader.Find("Sprites/Default");
     }
 
     // Update is called once per frame
     void Update()
     {
+        Debug.Log(playerRuntime.Position);
+        transform.localPosition = playerRuntime.Position;
+        if(invulnerable)
+        {
+            if (invul_started + invul_time <= Time.time)
+            {
+                invulnerable = false;
+            }
+
+            if(lastFlash + flashTime <= Time.time)
+            {
+                flash = !flash;
+                lastFlash = Time.time;
+            }
+
+            if(flash)
+            {
+                flashSprite();
+            }
+            else
+            {
+                normalSprite();
+            }
+        }
+        else
+        {
+            invul_started = Time.time;
+        }
+
+        if(!invulnerable && flash)
+        {
+            normalSprite();
+            flash = false;
+        }
+
         vel = new Vector2(0, vel.y);
         if (Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.LeftArrow))
         {
             vel = new Vector3(-0.05f, vel.y);
-            //transform.position = transform.position - 0.05f * Vector3.right;
-            //mainCamera.transform.position = mainCamera.transform.position - 0.05f * Vector3.right;
             setAnimationTrue("walking");
+            spriteRenderer.flipX = true;
+            shootDir = -1;
 
         }
         else if (Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.RightArrow))
         {
             vel = new Vector3(0.05f, vel.y);
-            //transform.position = transform.position - 0.05f * Vector3.left;
-            //mainCamera.transform.position = mainCamera.transform.position - 0.05f * Vector3.left;
             setAnimationTrue("walking");
+            spriteRenderer.flipX = false;
+            shootDir = 1;
         }
         else
         {
@@ -51,14 +105,14 @@ public class Player : MonoBehaviour
 
         if (Input.GetKeyDown(KeyCode.J) || Input.GetKeyDown(KeyCode.Z))
         {
-            acc = new Vector2(acc.x, 10f);
+            acc = new Vector2(acc.x, 11f);
         }
 
         if(Input.GetKeyDown(KeyCode.H) || Input.GetKeyDown(KeyCode.X))
         {
             setAnimationTrue("shooting");
             shooting = true;
-            bone.Fire(1, transform.position);
+            bone.Fire(shootDir, transform.position);
         }
 
         // set "climb_search" is true when pressing "up"
@@ -73,15 +127,13 @@ public class Player : MonoBehaviour
             if (climbing_left)
             {
                 transform.position = transform.position - 0.05f * Vector3.left + 0.1f * Vector3.up;
-                //mainCamera.transform.position = mainCamera.transform.position - 0.05f * Vector3.left;
-                Debug.Log("Climbing left");
+                //Debug.Log("Climbing left");
                 setAnimationTrue("walking");
             }
             else if (climbing_right)
             {
                 transform.position = transform.position - 0.05f * Vector3.right + 0.01f * Vector3.up;
-                //mainCamera.transform.position = mainCamera.transform.position - 0.05f * Vector3.right;
-                Debug.Log("Climbing right");
+                //Debug.Log("Climbing right");
                 setAnimationTrue("walking");
             }
             else
@@ -117,20 +169,22 @@ public class Player : MonoBehaviour
         Debug.DrawLine(transform.position + Vector3.left * 0.01f, transform.position + Vector3.left * 0.01f + Vector3.down * 0.1f, Color.magenta);
         Debug.DrawLine(transform.position + Vector3.right * 0.01f, transform.position + Vector3.right * 0.01f + Vector3.down * 0.1f, Color.magenta);
 
-        RaycastHit2D leftDownHit = Physics2D.Raycast(downLeftRay, Vector3.down, 0.1f, 1 << LayerMask.NameToLayer("colliders"));
-        RaycastHit2D rightDownHit = Physics2D.Raycast(downRightRay, Vector3.down, 0.1f, 1 << LayerMask.NameToLayer("colliders"));
-        RaycastHit2D leftUpHit = Physics2D.Raycast(upLeftRay, Vector3.up, 0.1f, 1 << LayerMask.NameToLayer("colliders"));
-        RaycastHit2D rightUpHit = Physics2D.Raycast(upRightRay, Vector3.up, 0.1f, 1 << LayerMask.NameToLayer("colliders"));
-        RaycastHit2D leftSideHit = Physics2D.Raycast(sideLeftRay, Vector3.left, 0.3f, 1 << LayerMask.NameToLayer("colliders"));
-        RaycastHit2D rightSideHit = Physics2D.Raycast(sideRightRay, Vector3.right, 0.3f, 1 << LayerMask.NameToLayer("colliders"));
-        RaycastHit2D lowLeftSideHit = Physics2D.Raycast(lowSideLeftRay, Vector3.left, 0.3f, 1 << LayerMask.NameToLayer("colliders"));
-        RaycastHit2D lowRightSideHit = Physics2D.Raycast(lowSideRightRay, Vector3.right, 0.3f, 1 << LayerMask.NameToLayer("colliders"));
-        RaycastHit2D highLeftSideHit = Physics2D.Raycast(highSideLeftRay, Vector3.left, 0.3f, 1 << LayerMask.NameToLayer("colliders"));
-        RaycastHit2D highRightSideHit = Physics2D.Raycast(highSideRightRay, Vector3.right, 0.3f, 1 << LayerMask.NameToLayer("colliders"));
+        int colliderMask = 1 << LayerMask.NameToLayer("colliders");
+        int objectMask = 1 << LayerMask.NameToLayer("objects");
+        int layerMask = colliderMask | objectMask;
+        RaycastHit2D leftDownHit = Physics2D.Raycast(downLeftRay, Vector3.down, 0.1f, layerMask);
+        RaycastHit2D rightDownHit = Physics2D.Raycast(downRightRay, Vector3.down, 0.1f, layerMask);
+        RaycastHit2D leftUpHit = Physics2D.Raycast(upLeftRay, Vector3.up, 0.1f, layerMask);
+        RaycastHit2D rightUpHit = Physics2D.Raycast(upRightRay, Vector3.up, 0.1f, layerMask);
+        RaycastHit2D leftSideHit = Physics2D.Raycast(sideLeftRay, Vector3.left, 0.3f, layerMask);
+        RaycastHit2D rightSideHit = Physics2D.Raycast(sideRightRay, Vector3.right, 0.3f, layerMask);
+        RaycastHit2D lowLeftSideHit = Physics2D.Raycast(lowSideLeftRay, Vector3.left, 0.3f, layerMask);
+        RaycastHit2D lowRightSideHit = Physics2D.Raycast(lowSideRightRay, Vector3.right, 0.3f, layerMask);
+        RaycastHit2D highLeftSideHit = Physics2D.Raycast(highSideLeftRay, Vector3.left, 0.3f, layerMask);
+        RaycastHit2D highRightSideHit = Physics2D.Raycast(highSideRightRay, Vector3.right, 0.3f, layerMask);
 
         if (leftDownHit.collider != null || rightDownHit.collider != null)
         {
-            float distance = 0f;
             Vector2 point = Vector2.zero;
             if (rightDownHit.collider != null) point = rightDownHit.point;
             if (leftDownHit.collider != null) point = leftDownHit.point;
@@ -138,7 +192,7 @@ public class Player : MonoBehaviour
             // TODO: Same jumping code is in two places?!
             if (Input.GetKeyDown(KeyCode.J) || Input.GetKeyDown(KeyCode.Z))
             {
-                acc = new Vector2(acc.x, 10f);
+                //acc = new Vector2(acc.x, 11f);
             }
             else
             {
@@ -146,7 +200,6 @@ public class Player : MonoBehaviour
                 vel = new Vector2(vel.x, 0);
                 transform.position = new Vector3(transform.position.x, point.y + 1f, transform.position.z);
             }
-            //Debug.Log("not falling");
         }
         else
         {
@@ -154,7 +207,6 @@ public class Player : MonoBehaviour
             climbing_left = false;
             climbing_right = false;
             acc = new Vector2(acc.x, g);
-            //Debug.Log("falling");
         }
         
         if(leftUpHit.collider != null)
@@ -218,14 +270,18 @@ public class Player : MonoBehaviour
 
         vel = new Vector2(vel.x, vel.y + acc.y * Time.deltaTime);
         transform.position = transform.position + new Vector3(vel.x, vel.y);
-        mainCamera.transform.position = new Vector3(transform.position.x, mainCamera.transform.position.y, mainCamera.transform.position.z);
+        playerRuntime.Position = transform.localPosition;
+
+        float levelMaxX = levelRuntime.LevelWidth-9.5f;
+        float cameraX = Mathf.Max(-0.5f, Mathf.Min(levelMaxX, transform.position.x));
+        mainCamera.transform.position = new Vector3(cameraX, mainCamera.transform.position.y, mainCamera.transform.position.z);
     }
 
     private Vector2 leftSideCollision(Vector2 vel, RaycastHit2D hit)
     {
         GameObject collider = hit.collider.gameObject;
         TileCollider tileCollider = collider.GetComponent<TileCollider>();
-        //Debug.Log("Left side collision detected");
+
         if (tileCollider.Parent.ColliderType == ColliderType.Full && vel.x < 0)
         {
             vel = new Vector2(0, vel.y);
@@ -233,10 +289,10 @@ public class Player : MonoBehaviour
 
         if (climb_search)
         {
-            Debug.Log("Left side collider type while searching for stairs: " + Enum.GetName(typeof(ColliderType), tileCollider.Parent.ColliderType));
+            //Debug.Log("Left side collider type while searching for stairs: " + Enum.GetName(typeof(ColliderType), tileCollider.Parent.ColliderType));
             if (tileCollider.Parent.ColliderType == ColliderType.RightStairs) //why is this right stairs and not left??!
             {
-                Debug.Log("found climb left side stairs");
+                //Debug.Log("found climb left side stairs");
                 climbing_left = true;
             }
             else
@@ -252,7 +308,7 @@ public class Player : MonoBehaviour
     {
         GameObject collider = hit.collider.gameObject;
         TileCollider tileCollider = collider.GetComponent<TileCollider>();
-        //Debug.Log("Right side collision detected");
+
         if (tileCollider.Parent.ColliderType == ColliderType.Full && vel.x > 0)
         {
             vel = new Vector2(0, vel.y);
@@ -260,11 +316,11 @@ public class Player : MonoBehaviour
 
         if (climb_search)
         {
-            Debug.Log("Right side collider type while searching for stairs: " + Enum.GetName(typeof(ColliderType), tileCollider.Parent.ColliderType));
+            //Debug.Log("Right side collider type while searching for stairs: " + Enum.GetName(typeof(ColliderType), tileCollider.Parent.ColliderType));
             if (tileCollider.Parent.ColliderType == ColliderType.LeftStairs) //why is this left stairs and not right??!
             {
                 climbing_right = true;
-                Debug.Log("found climb right side stairs");
+                //Debug.Log("found climb right side stairs");
             }
             else
             {
@@ -292,5 +348,29 @@ public class Player : MonoBehaviour
     {
         shooting = false;
         animator.SetBool("shooting", false);
+    }
+
+    public void TakeHit(int damage)
+    {
+        if (invulnerable) return;
+
+        invulnerable = true;
+        playerRuntime.HP -= damage;
+        if(playerRuntime.HP <= 0)
+        {
+            //todo: death
+        }
+    }
+
+    private void flashSprite()
+    {
+        spriteRenderer.material.shader = shaderFlash;
+        spriteRenderer.color = Color.white;
+    }
+
+    private void normalSprite()
+    {
+        spriteRenderer.material.shader = shaderSpritesDefault;
+        spriteRenderer.color = Color.white;
     }
 }

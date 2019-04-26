@@ -6,18 +6,18 @@ using UnityEngine;
 public class Tile : MonoBehaviour
 {
     [SerializeField]
-    private BoxCollider2D fullCollider;
+    private BoxCollider2D fullCollider = null;
     [SerializeField]
-    private BoxCollider2D semiCollider;
+    private BoxCollider2D semiCollider = null;
     [SerializeField]
-    private PolygonCollider2D leftStairsCollider;
+    private PolygonCollider2D leftStairsCollider = null;
     [SerializeField]
-    private PolygonCollider2D rightStairsCollider;
+    private PolygonCollider2D rightStairsCollider = null;
     [SerializeField]
     private ColliderType type = ColliderType.None;
     public ColliderType ColliderType { get { return type; } }
     [SerializeField]
-    private SpriteRenderer spriteRenderer;
+    private SpriteRenderer spriteRenderer = null;
 
     // Start is called before the first frame update
     void Start()

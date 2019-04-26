@@ -5,7 +5,7 @@ using UnityEngine;
 public class EnemyChild : MonoBehaviour
 {
     [SerializeField]
-    private Enemy parent;
+    private Enemy parent = null;
 
     // Start is called before the first frame update
     void Start()
@@ -19,9 +19,9 @@ public class EnemyChild : MonoBehaviour
 
     }
 
-    public void TakeDamage()
+    public bool TakeDamage()
     {
-        parent.TakeDamage();
+        return parent.TakeDamage();
     }
 
     public void NotHittable()
