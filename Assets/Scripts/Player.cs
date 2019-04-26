@@ -47,22 +47,21 @@ public class Player : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        Debug.Log(playerRuntime.Position);
         transform.localPosition = playerRuntime.Position;
-        if(invulnerable)
+        if (invulnerable)
         {
             if (invul_started + invul_time <= Time.time)
             {
                 invulnerable = false;
             }
 
-            if(lastFlash + flashTime <= Time.time)
+            if (lastFlash + flashTime <= Time.time)
             {
                 flash = !flash;
                 lastFlash = Time.time;
             }
 
-            if(flash)
+            if (flash)
             {
                 flashSprite();
             }
@@ -76,7 +75,14 @@ public class Player : MonoBehaviour
             invul_started = Time.time;
         }
 
-        if(!invulnerable && flash)
+        //death by falling
+        if(transform.localPosition.y < -4)
+        {
+            playerRuntime.HP = 0;
+        }
+
+
+        if (!invulnerable && flash)
         {
             normalSprite();
             flash = false;
@@ -103,12 +109,12 @@ public class Player : MonoBehaviour
             setAnimationTrue("idling");
         }
 
-        if (Input.GetKeyDown(KeyCode.J) || Input.GetKeyDown(KeyCode.Z))
+        if (Input.GetKeyDown(KeyCode.H) || Input.GetKeyDown(KeyCode.Z))
         {
             acc = new Vector2(acc.x, 11f);
         }
 
-        if(Input.GetKeyDown(KeyCode.H) || Input.GetKeyDown(KeyCode.X))
+        if (Input.GetKeyDown(KeyCode.J) || Input.GetKeyDown(KeyCode.X))
         {
             setAnimationTrue("shooting");
             shooting = true;
@@ -172,16 +178,17 @@ public class Player : MonoBehaviour
         int colliderMask = 1 << LayerMask.NameToLayer("colliders");
         int objectMask = 1 << LayerMask.NameToLayer("objects");
         int layerMask = colliderMask | objectMask;
-        RaycastHit2D leftDownHit = Physics2D.Raycast(downLeftRay, Vector3.down, 0.1f, layerMask);
-        RaycastHit2D rightDownHit = Physics2D.Raycast(downRightRay, Vector3.down, 0.1f, layerMask);
-        RaycastHit2D leftUpHit = Physics2D.Raycast(upLeftRay, Vector3.up, 0.1f, layerMask);
-        RaycastHit2D rightUpHit = Physics2D.Raycast(upRightRay, Vector3.up, 0.1f, layerMask);
-        RaycastHit2D leftSideHit = Physics2D.Raycast(sideLeftRay, Vector3.left, 0.3f, layerMask);
-        RaycastHit2D rightSideHit = Physics2D.Raycast(sideRightRay, Vector3.right, 0.3f, layerMask);
-        RaycastHit2D lowLeftSideHit = Physics2D.Raycast(lowSideLeftRay, Vector3.left, 0.3f, layerMask);
-        RaycastHit2D lowRightSideHit = Physics2D.Raycast(lowSideRightRay, Vector3.right, 0.3f, layerMask);
-        RaycastHit2D highLeftSideHit = Physics2D.Raycast(highSideLeftRay, Vector3.left, 0.3f, layerMask);
-        RaycastHit2D highRightSideHit = Physics2D.Raycast(highSideRightRay, Vector3.right, 0.3f, layerMask);
+
+        RaycastHit2D leftDownHit = raycast(downLeftRay, Vector3.down, 0.1f, layerMask);
+        RaycastHit2D rightDownHit = raycast(downRightRay, Vector3.down, 0.1f, layerMask);
+        RaycastHit2D leftUpHit = raycast(upLeftRay, Vector3.up, 0.1f, layerMask);
+        RaycastHit2D rightUpHit = raycast(upRightRay, Vector3.up, 0.1f, layerMask);
+        RaycastHit2D leftSideHit = raycast(sideLeftRay, Vector3.left, 0.3f, layerMask);
+        RaycastHit2D rightSideHit = raycast(sideRightRay, Vector3.right, 0.3f, layerMask);
+        RaycastHit2D lowLeftSideHit = raycast(lowSideLeftRay, Vector3.left, 0.3f, layerMask);
+        RaycastHit2D lowRightSideHit = raycast(lowSideRightRay, Vector3.right, 0.3f, layerMask);
+        RaycastHit2D highLeftSideHit = raycast(highSideLeftRay, Vector3.left, 0.3f, layerMask);
+        RaycastHit2D highRightSideHit = raycast(highSideRightRay, Vector3.right, 0.3f, layerMask);
 
         if (leftDownHit.collider != null || rightDownHit.collider != null)
         {
@@ -190,7 +197,7 @@ public class Player : MonoBehaviour
             if (leftDownHit.collider != null) point = leftDownHit.point;
 
             // TODO: Same jumping code is in two places?!
-            if (Input.GetKeyDown(KeyCode.J) || Input.GetKeyDown(KeyCode.Z))
+            if (Input.GetKeyDown(KeyCode.H) || Input.GetKeyDown(KeyCode.Z))
             {
                 //acc = new Vector2(acc.x, 11f);
             }
@@ -208,8 +215,8 @@ public class Player : MonoBehaviour
             climbing_right = false;
             acc = new Vector2(acc.x, g);
         }
-        
-        if(leftUpHit.collider != null)
+
+        if (leftUpHit.collider != null)
         {
             GameObject collider = leftUpHit.collider.gameObject;
             TileCollider tileCollider = collider.GetComponent<TileCollider>();
@@ -272,7 +279,7 @@ public class Player : MonoBehaviour
         transform.position = transform.position + new Vector3(vel.x, vel.y);
         playerRuntime.Position = transform.localPosition;
 
-        float levelMaxX = levelRuntime.LevelWidth-9.5f;
+        float levelMaxX = levelRuntime.LevelWidth - 9.5f;
         float cameraX = Mathf.Max(-0.5f, Mathf.Min(levelMaxX, transform.position.x));
         mainCamera.transform.position = new Vector3(cameraX, mainCamera.transform.position.y, mainCamera.transform.position.z);
     }
@@ -281,6 +288,7 @@ public class Player : MonoBehaviour
     {
         GameObject collider = hit.collider.gameObject;
         TileCollider tileCollider = collider.GetComponent<TileCollider>();
+        if (tileCollider == null) return vel;
 
         if (tileCollider.Parent.ColliderType == ColliderType.Full && vel.x < 0)
         {
@@ -308,6 +316,7 @@ public class Player : MonoBehaviour
     {
         GameObject collider = hit.collider.gameObject;
         TileCollider tileCollider = collider.GetComponent<TileCollider>();
+        if (tileCollider == null) return vel;
 
         if (tileCollider.Parent.ColliderType == ColliderType.Full && vel.x > 0)
         {
@@ -333,7 +342,7 @@ public class Player : MonoBehaviour
 
     private void setAnimationTrue(string name)
     {
-        if(name == "walking" && shooting)
+        if (name == "walking" && shooting)
         {
             return;
         }
@@ -356,7 +365,7 @@ public class Player : MonoBehaviour
 
         invulnerable = true;
         playerRuntime.HP -= damage;
-        if(playerRuntime.HP <= 0)
+        if (playerRuntime.HP <= 0)
         {
             //todo: death
         }
@@ -372,5 +381,51 @@ public class Player : MonoBehaviour
     {
         spriteRenderer.material.shader = shaderSpritesDefault;
         spriteRenderer.color = Color.white;
+    }
+
+    /*private void OnCollisionEnter2D(Collision2D collision)
+    {
+        TriggerTrigger(collision);
+    }
+
+    private void OnCollisionStay2D(Collision2D collision)
+    {
+        TriggerTrigger(collision);
+    }
+
+    private void TriggerTrigger(Collision2D col)
+    {
+        Debug.Log("Trigger triggered");
+        if (col.gameObject.tag == "Switch")
+        {
+            Debug.Log("Switch triggered");
+            if (Input.GetKeyDown(KeyCode.S) || Input.GetKeyDown(KeyCode.DownArrow))
+            {
+                Switch s = col.gameObject.GetComponent<Switch>();
+                if (s != null)
+                {
+                    s.Flip();
+                    Debug.Log("Switch Flipped");
+                }
+            }
+        }
+    }*/
+
+    private RaycastHit2D raycast(Vector3 origin, Vector2 dir, float distance, int layerMask)
+    {
+        RaycastHit2D result = new RaycastHit2D();
+        ContactFilter2D filter = new ContactFilter2D();
+        filter.layerMask = layerMask;
+        filter.useTriggers = false;
+        filter.useLayerMask = true;
+        List<RaycastHit2D> results = new List<RaycastHit2D>();
+
+        int hits = Physics2D.Raycast(origin, dir, filter, results, distance);
+        if (hits > 0)
+        {
+            result = results[0];
+        }
+
+        return result;
     }
 }

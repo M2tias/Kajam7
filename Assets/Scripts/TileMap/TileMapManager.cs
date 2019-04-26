@@ -26,6 +26,16 @@ public class TileMapManager : MonoBehaviour
     private LevelRuntime levelRuntime = null;
     [SerializeField]
     private PlayerRuntime playerRuntime = null;
+    [SerializeField]
+    private Sprite onSwitch = null;
+    [SerializeField]
+    private Sprite offSwitch = null;
+    [SerializeField]
+    private GameObject gameOverScreen = null;
+    [SerializeField]
+    private GameObject winScreen = null;
+    [SerializeField]
+    private GameObject fullScreen = null; //TODO: remove this and set the bg on win/gameOverScreens
 
     private GameObject background = null;
     private GameObject colliders = null;
@@ -52,6 +62,13 @@ public class TileMapManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        if (playerRuntime.HP <= 0)
+        {
+            fullScreen.SetActive(true);
+            gameOverScreen.SetActive(true);
+            Time.timeScale = 0;
+        }
+
         //TODO this is game manager stuff
         if (levelRuntime.LoadNext)
         {
@@ -61,7 +78,9 @@ public class TileMapManager : MonoBehaviour
             currentLevelIndex++;
             if(currentLevelIndex == levelConfig.Levels.Count)
             {
-                //TODO win!
+                fullScreen.SetActive(true);
+                winScreen.SetActive(true);
+                Time.timeScale = 0;
                 return;
             }
             foreach (Transform child in background.transform)
@@ -161,6 +180,9 @@ public class TileMapManager : MonoBehaviour
             layerInt++;
         }
 
+        List<Door> doors = new List<Door>();
+        List<Switch> switches = new List<Switch>();
+
         foreach (TmxObjectGroup objectGroup in map.ObjectGroups)
         {
             foreach (TmxObject obj in objectGroup.Objects)
@@ -174,6 +196,38 @@ public class TileMapManager : MonoBehaviour
                 SpriteRenderer renderer = tileObj.GetComponent<SpriteRenderer>();
                 renderer.sprite = sprites[tile.Gid - 1];
 
+                if (tilesetTile.Id == 28) // switch
+                {
+                    Collider2D collider = tileObj.GetFullCollider();
+                    Switch s = tileObj.gameObject.AddComponent<Switch>() as Switch;
+                    switches.Add(s);
+                    if(!obj.Properties.ContainsKey("switch"))
+                    {
+                        Debug.Log("ERROR No property on switch");
+                        Application.Quit();
+                    }
+
+                    s.ID = int.Parse(obj.Properties["switch"]);
+                    s.SetRenderer(renderer);
+                    s.SetSprites(onSwitch, offSwitch);
+                    s.tag = "Switch";
+                }
+                else if(tilesetTile.Id == 26 || tilesetTile.Id == 27) // door
+                {
+                    Collider2D collider = tileObj.GetFullCollider();
+                    Door d = tileObj.gameObject.AddComponent<Door>() as Door;
+                    doors.Add(d);
+
+                    if (!obj.Properties.ContainsKey("door"))
+                    {
+                        Debug.Log("ERROR No property on door");
+                        Application.Quit();
+                    }
+
+                    d.ID = int.Parse(obj.Properties["door"]);
+                    d.SetDeps(renderer, collider);
+                }
+
                 float xPos = tileX - 10;
                 tileObj.transform.position = new Vector3(xPos, -tileY + 9.5f, 0);
                 tileObj.gameObject.layer = LayerMask.NameToLayer("objects");
@@ -182,6 +236,17 @@ public class TileMapManager : MonoBehaviour
 
                 tileObj.SetCollider(tilesetTile.Properties["collider"]);
                 maxX = Mathf.Max(maxX, xPos);
+            }
+        }
+
+        foreach (Switch s in switches)
+        {
+            foreach (Door d in doors)
+            {
+                if(s.ID == d.ID)
+                {
+                    d.SetSwitch(s);
+                }
             }
         }
 

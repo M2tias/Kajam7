@@ -210,7 +210,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   colliderForTakingDamage: {fileID: 878486007907093388}
-  colliderForDamagingPlayer: {fileID: 7108817572416609438}
+  colliderForDamagingPlayer: {fileID: 878486007907093388}
   HP: 2
   damage: 1
   walks: 1

@@ -143,12 +143,12 @@
  </tile>
  <tile id="28">
   <properties>
-   <property name="collider" value="None"/>
+   <property name="collider" value="Trigger"/>
   </properties>
  </tile>
  <tile id="29">
   <properties>
-   <property name="collider" value="None"/>
+   <property name="collider" value="Trigger"/>
   </properties>
  </tile>
  <tile id="30">

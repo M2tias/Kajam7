@@ -123,4 +123,9 @@ public class Enemy : MonoBehaviour
             }
         }
     }
+
+    public void DoDamage(Player player)
+    {
+        player.TakeHit(damage);
+    }
 }

@@ -59,12 +59,21 @@ public class Tile : MonoBehaviour
             case ColliderType.Full:
                 fullCollider.enabled = true;
                 break;
+            case ColliderType.Trigger:
+                fullCollider.enabled = true;
+                fullCollider.isTrigger = true;
+                break;
         }
     }
 
     public void SetLayerInt(int layerInt)
     {
         spriteRenderer.sortingOrder = layerInt;
+    }
+
+    public BoxCollider2D GetFullCollider()
+    {
+        return fullCollider;
     }
 }
 
@@ -74,5 +83,6 @@ public enum ColliderType
     Semi,
     LeftStairs,
     RightStairs,
-    Full
+    Full,
+    Trigger
 }

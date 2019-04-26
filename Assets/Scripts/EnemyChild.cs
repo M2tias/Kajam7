@@ -33,4 +33,16 @@ public class EnemyChild : MonoBehaviour
     {
         parent.Hittable();
     }
+
+    private void OnCollisionEnter2D(Collision2D other)
+    {
+        if (other.collider.tag == "Player")
+        {
+            Player player = other.gameObject.GetComponent<Player>();
+            if (player != null)
+            {
+                parent.DoDamage(player);
+            }
+        }
+    }
 }
